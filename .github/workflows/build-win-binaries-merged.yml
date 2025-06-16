@@ -1,0 +1,40 @@
+name: Build WIN Binaries (Gaia + Tensorflow) CMake
+
+on: [workflow_dispatch]
+
+env:
+  VERSION: ${{vars.VERSION}}
+
+jobs:
+  windows:
+    name: Windows (merge releases)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+      - name: Download artifacts
+        run: |
+          echo Downloading essentia tensorflow ...
+          curl -L -o "essentia-win64.zip" "https://nightly.link/regorxxx/essentia/workflows/build-win-binaries/cmake-win/essentia-${{env.VERSION}}-win64.zip"
+          echo Extracting essentia-win64 archive ...
+          7z e -y "essentia-win64.zip" -oOut
+          
+          echo Downloading essentia tensorflow ...
+          curl -L -o "essentia-tensorflow-win64.zip" "https://nightly.link/regorxxx/essentia/workflows/build-win-binaries-tensorflow/cmake-win/essentia-${{env.VERSION}}-tensorflow-win64.zip"
+          echo Extracting essentia-tensorflow-win64 archive ...
+          7z e -y "essentia-tensorflow-win64.zip" -oOut
+          
+          echo Downloading essentia gaia ...
+          curl -L -o "essentia-gaia-win64.zip" "https://nightly.link/regorxxx/essentia/workflows/build-win-binaries-tensorflow/cmake-win/essentia-${{env.VERSION}}-gaia-win64.zip"
+          echo Extracting essentia-gaia-win64 archive ...
+          7z e -y "essentia-gaia-win64.zip" -oOut
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: essentia-${{env.VERSION}}-all-win64
+          path: |
+            Out/*.exe
+            Out/*.dll

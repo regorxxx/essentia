@@ -1,0 +1,49 @@
+name: Build WIN Binaries CMake
+
+on: [workflow_dispatch]
+
+env:
+  # CMake build type (Debug, Release, RelWithDebInfo or MinSizeRel)
+  BUILD_TYPE: Release
+  VERSION: ${{vars.VERSION}}
+
+jobs:
+  windows:
+    name: Windows (build and test)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Install dependencies
+        run: .\packaging\build-dependencies-msvc.bat --static --build-type Release 
+        #Force Release even for Debug builds so it requires standard dll's
+        
+      - name: Configure
+        run: cmake -B build -DBUILD_EXAMPLES=ON -DENABLE_STATIC_DEPENDENCIES=ON -DBUILD_TESTS=ON -DCMAKE_PREFIX_PATH=%CD%\packaging\msvc
+
+      - name: Build
+        run: |
+          set PATH=%PATH%;%CD%\packaging\msvc\bin
+          cmake --build build --config ${{env.BUILD_TYPE}} --parallel
+
+      - name: Test
+        run: |
+          set PATH=%PATH%;%CD%\packaging\msvc\bin
+          ctest --test-dir build --output-on-failure -C ${{env.BUILD_TYPE}}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: essentia-${{env.VERSION}}-win64
+          path: |
+            build/src/examples/${{env.BUILD_TYPE}}
+            !build/src/examples/${{env.BUILD_TYPE}}/*.pdb
+            !build/src/examples/${{env.BUILD_TYPE}}/*.lib
+            !build/src/examples/${{env.BUILD_TYPE}}/*.exp

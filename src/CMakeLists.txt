@@ -4,10 +4,16 @@ if (MSVC)
     #set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES)
   endif()
   
+  # The following compile definitions are necessary to properly setup
+  # the "__declspec" attribute for Chromaprint, Yaml or TagLib.
   if (ENABLE_STATIC_DEPENDENCIES)
-    # These are necessary to properly set up the __declspec attribute. It might be better
-    # to have separate options: ENABLE_STATIC_CHROMAPRINT, ENABLE_STATIC_YAML etc.
     add_compile_definitions(CHROMAPRINT_NODLL YAML_DECLARE_STATIC TAGLIB_STATIC)
+  elseif(ENABLE_STATIC_CHROMAPRINT)
+    add_compile_definitions(CHROMAPRINT_NODLL)
+  elseif(ENABLE_STATIC_YAML)
+    add_compile_definitions(YAML_DECLARE_STATIC)
+  elseif(ENABLE_STATIC_TAGLIB)
+    add_compile_definitions(TAGLIB_STATIC)
   endif()
 endif()
 
@@ -18,6 +24,16 @@ if (MSVC AND ENABLE_STATIC_DEPENDENCIES)
   # In case Essentia is linked against static FFmpeg libraries, we need to add
   # the bcrypt dependency manually (required by avutil).
   target_link_libraries(essentia PUBLIC bcrypt.lib)
+endif()
+
+# Debugging option is enabled by default (see src/essentia/config.h)
+if(NOT DEBUGGING_ENABLED)
+  add_compile_definitions(DEBUGGING_ENABLED=0)
+endif()
+
+# Strip documentation option is disabled by default (see src/essentia/config.h)
+if(STRIP_DOCUMENTATION)
+  add_compile_definitions(STRIP_DOCUMENTATION=1)
 endif()
 
 set_target_properties(essentia PROPERTIES DEBUG_POSTFIX _d)

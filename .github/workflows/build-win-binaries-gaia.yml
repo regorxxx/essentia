@@ -26,7 +26,7 @@ jobs:
         #Force Release even for Debug builds so it requires standard dll's
         
       - name: Configure
-        run: cmake -B build -DUSE_GAIA2=ON -DBUILD_EXAMPLES=ON -DENABLE_STATIC_DEPENDENCIES=ON -DBUILD_TESTS=ON -DCMAKE_PREFIX_PATH=%CD%\packaging\msvc
+        run: cmake -B build -DUSE_GAIA2=ON -DBUILD_EXAMPLES="streaming_extractor_music;streaming_extractor_freesound" -DENABLE_STATIC_DEPENDENCIES=ON -DBUILD_TESTS=ON -DCMAKE_PREFIX_PATH=%CD%\packaging\msvc
 
       - name: Build
         run: |

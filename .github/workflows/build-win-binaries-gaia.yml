@@ -22,7 +22,7 @@ jobs:
           submodules: 'true'
 
       - name: Install dependencies
-        run: .\packaging\build-dependencies-msvc.bat --static --shared x --with-gaia --build-type Release 
+        run: .\packaging\build-dependencies-msvc.bat --static --with-gaia --build-type Release 
         #Force Release even for Debug builds so it requires standard dll's
         
       - name: Configure
